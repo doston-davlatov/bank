@@ -13,15 +13,14 @@ class LoanSchedulController extends Controller
      */
     public function index()
     {
-        //
-    }
+        $schedules = Loan_schedul::with('loan')
+            ->orderBy('due_date', 'asc')
+            ->paginate(20);
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return response()->json([
+            'success' => true,
+            'data' => $schedules
+        ]);
     }
 
     /**
@@ -29,7 +28,13 @@ class LoanSchedulController extends Controller
      */
     public function store(StoreLoan_schedulRequest $request)
     {
-        //
+        $schedule = Loan_schedul::create($request->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Loan schedule created successfully',
+            'data' => $schedule
+        ], 201);
     }
 
     /**
@@ -37,15 +42,12 @@ class LoanSchedulController extends Controller
      */
     public function show(Loan_schedul $loan_schedul)
     {
-        //
-    }
+        $loan_schedul->load('loan');
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Loan_schedul $loan_schedul)
-    {
-        //
+        return response()->json([
+            'success' => true,
+            'data' => $loan_schedul
+        ]);
     }
 
     /**
@@ -53,7 +55,13 @@ class LoanSchedulController extends Controller
      */
     public function update(UpdateLoan_schedulRequest $request, Loan_schedul $loan_schedul)
     {
-        //
+        $loan_schedul->update($request->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Loan schedule updated successfully',
+            'data' => $loan_schedul
+        ]);
     }
 
     /**
@@ -61,6 +69,11 @@ class LoanSchedulController extends Controller
      */
     public function destroy(Loan_schedul $loan_schedul)
     {
-        //
+        $loan_schedul->delete(); // soft delete qo‘shish mumkin
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Loan schedule deleted successfully'
+        ]);
     }
 }

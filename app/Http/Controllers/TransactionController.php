@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\transaction;
-use App\Http\Requests\StoretransactionRequest;
-use App\Http\Requests\UpdatetransactionRequest;
+use App\Models\Transaction;
+use App\Http\Requests\StoreTransactionRequest;
+use App\Http\Requests\UpdateTransactionRequest;
 
 class TransactionController extends Controller
 {
@@ -13,54 +13,77 @@ class TransactionController extends Controller
      */
     public function index()
     {
-        //
-    }
+        $transactions = Transaction::with([
+            'debitAccount', 'creditAccount',
+            'debitCard', 'creditCard',
+            'debitCustomer', 'creditCustomer',
+            'loan', 'branch', 'performedBy'
+        ])
+            ->orderBy('executed_at', 'desc')
+            ->paginate(20);
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return response()->json([
+            'success' => true,
+            'data' => $transactions
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoretransactionRequest $request)
+    public function store(StoreTransactionRequest $request)
     {
-        //
+        $transaction = Transaction::create($request->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Transaction created successfully',
+            'data' => $transaction
+        ], 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(transaction $transaction)
+    public function show(Transaction $transaction)
     {
-        //
-    }
+        $transaction->load([
+            'debitAccount', 'creditAccount',
+            'debitCard', 'creditCard',
+            'debitCustomer', 'creditCustomer',
+            'loan', 'branch', 'performedBy'
+        ]);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(transaction $transaction)
-    {
-        //
+        return response()->json([
+            'success' => true,
+            'data' => $transaction
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdatetransactionRequest $request, transaction $transaction)
+    public function update(UpdateTransactionRequest $request, Transaction $transaction)
     {
-        //
+        $transaction->update($request->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Transaction updated successfully',
+            'data' => $transaction
+        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(transaction $transaction)
+    public function destroy(Transaction $transaction)
     {
-        //
+        $transaction->delete(); // soft delete qo‘shilgan bo‘lsa ishlaydi
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Transaction deleted successfully'
+        ]);
     }
 }

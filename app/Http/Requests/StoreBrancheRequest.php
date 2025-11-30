@@ -19,10 +19,17 @@ class StoreBrancheRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+    public function rules()
     {
         return [
-            //
+            'code' => 'required|string|max:10|unique:branches,code',
+            'name_uz' => 'required|string|max:255',
+            'name_ru' => 'nullable|string|max:255',
+            'name_en' => 'nullable|string|max:255',
+            'address' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'is_active' => 'boolean'
         ];
     }
+
 }

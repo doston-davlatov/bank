@@ -13,15 +13,15 @@ class LoanController extends Controller
      */
     public function index()
     {
-        //
-    }
+        // Eng so‘nggi berilgan kreditlar, pagination bilan
+        $loans = Loan::with(['customer', 'branch']) // optimized
+        ->orderBy('created_at', 'desc')
+            ->paginate(20);
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return response()->json([
+            'success' => true,
+            'data' => $loans
+        ]);
     }
 
     /**
@@ -29,7 +29,13 @@ class LoanController extends Controller
      */
     public function store(StoreLoanRequest $request)
     {
-        //
+        $loan = Loan::create($request->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Loan created successfully',
+            'data' => $loan
+        ], 201);
     }
 
     /**
@@ -37,15 +43,13 @@ class LoanController extends Controller
      */
     public function show(Loan $loan)
     {
-        //
-    }
+        // Relationship bilan birga qaytarish
+        $loan->load(['customer', 'branch']);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Loan $loan)
-    {
-        //
+        return response()->json([
+            'success' => true,
+            'data' => $loan
+        ]);
     }
 
     /**
@@ -53,7 +57,13 @@ class LoanController extends Controller
      */
     public function update(UpdateLoanRequest $request, Loan $loan)
     {
-        //
+        $loan->update($request->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Loan updated successfully',
+            'data' => $loan
+        ]);
     }
 
     /**
@@ -61,6 +71,11 @@ class LoanController extends Controller
      */
     public function destroy(Loan $loan)
     {
-        //
+        $loan->delete(); // soft delete
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Loan deleted successfully'
+        ]);
     }
 }

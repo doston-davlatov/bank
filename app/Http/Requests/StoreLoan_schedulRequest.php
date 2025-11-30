@@ -11,18 +11,22 @@ class StoreLoan_schedulRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            //
+            'loan_id' => 'required|uuid|exists:loans,id',
+            'period' => 'required|integer|min:1',
+            'due_date' => 'required|date|after_or_equal:today',
+            'planned_principal' => 'required|numeric|min:0',
+            'planned_interest' => 'required|numeric|min:0',
+            'planned_total' => 'required|numeric|min:0',
+            'paid_amount' => 'nullable|numeric|min:0',
+            'is_paid' => 'nullable|boolean',
+            'paid_at' => 'nullable|date',
         ];
     }
+
 }

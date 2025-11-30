@@ -13,15 +13,13 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        //
-    }
+        // Eng so‘ngi mijozlar, pagination bilan
+        $customers = Customer::orderBy('created_at', 'desc')->paginate(20);
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return response()->json([
+            'success' => true,
+            'data' => $customers
+        ]);
     }
 
     /**
@@ -29,7 +27,13 @@ class CustomerController extends Controller
      */
     public function store(StoreCustomerRequest $request)
     {
-        //
+        $customer = Customer::create($request->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Customer created successfully',
+            'data' => $customer
+        ], 201);
     }
 
     /**
@@ -37,15 +41,10 @@ class CustomerController extends Controller
      */
     public function show(Customer $customer)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Customer $customer)
-    {
-        //
+        return response()->json([
+            'success' => true,
+            'data' => $customer
+        ]);
     }
 
     /**
@@ -53,7 +52,13 @@ class CustomerController extends Controller
      */
     public function update(UpdateCustomerRequest $request, Customer $customer)
     {
-        //
+        $customer->update($request->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Customer updated successfully',
+            'data' => $customer
+        ]);
     }
 
     /**
@@ -61,6 +66,12 @@ class CustomerController extends Controller
      */
     public function destroy(Customer $customer)
     {
-        //
+        // Soft delete
+        $customer->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Customer deleted successfully'
+        ]);
     }
 }

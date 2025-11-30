@@ -13,15 +13,13 @@ class CardController extends Controller
      */
     public function index()
     {
-        //
-    }
+        // Kartalar ro‘yxati (pagination bilan, eng so‘nggi chiqarilgan yuqorida)
+        $cards = Card::orderBy('created_at', 'desc')->paginate(15);
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return response()->json([
+            'success' => true,
+            'data' => $cards
+        ]);
     }
 
     /**
@@ -29,7 +27,13 @@ class CardController extends Controller
      */
     public function store(StoreCardRequest $request)
     {
-        //
+        $card = Card::create($request->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Card created successfully',
+            'data' => $card
+        ], 201);
     }
 
     /**
@@ -37,15 +41,10 @@ class CardController extends Controller
      */
     public function show(Card $card)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Card $card)
-    {
-        //
+        return response()->json([
+            'success' => true,
+            'data' => $card
+        ]);
     }
 
     /**
@@ -53,7 +52,13 @@ class CardController extends Controller
      */
     public function update(UpdateCardRequest $request, Card $card)
     {
-        //
+        $card->update($request->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Card updated successfully',
+            'data' => $card
+        ]);
     }
 
     /**
@@ -61,6 +66,12 @@ class CardController extends Controller
      */
     public function destroy(Card $card)
     {
-        //
+        // soft delete
+        $card->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Card deleted successfully'
+        ]);
     }
 }

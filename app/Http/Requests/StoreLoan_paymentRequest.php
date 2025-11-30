@@ -11,18 +11,21 @@ class StoreLoan_paymentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            //
+            'loan_id' => 'required|uuid|exists:loans,id',
+            'transaction_id' => 'nullable|uuid|exists:transactions,id',
+            'amount' => 'required|numeric|min:0',
+            'principal_part' => 'required|numeric|min:0',
+            'interest_part' => 'required|numeric|min:0',
+            'penalty_part' => 'nullable|numeric|min:0',
+            'payment_date' => 'nullable|date',
+            'payment_method' => 'required|string|max:30',
         ];
     }
+
 }

@@ -37,9 +37,16 @@ class AccountController extends Controller
 
     public function update(UpdateAccountRequest $request, Account $account)
     {
+        // Policy dagi update() metodi chaqiriladi
         $this->authorize('update', $account);
-        $account->update($request->validated());
-        return response()->json($account);
+
+        // Update logikasi
+        $account->update($request->all());
+
+        return response()->json([
+            'message' => 'Account updated successfully',
+            'account' => $account
+        ]);
     }
 
     public function destroy(Account $account)

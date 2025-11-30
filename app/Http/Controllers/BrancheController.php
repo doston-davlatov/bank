@@ -13,15 +13,13 @@ class BrancheController extends Controller
      */
     public function index()
     {
-        //
-    }
+        // Barcha filiallarni olish (pagination bilan)
+        $branches = Branche::orderBy('created_at', 'desc')->paginate(15);
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return response()->json([
+            'success' => true,
+            'data' => $branches
+        ]);
     }
 
     /**
@@ -29,7 +27,13 @@ class BrancheController extends Controller
      */
     public function store(StoreBrancheRequest $request)
     {
-        //
+        $branche = Branche::create($request->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Branche created successfully',
+            'data' => $branche
+        ], 201);
     }
 
     /**
@@ -37,15 +41,10 @@ class BrancheController extends Controller
      */
     public function show(Branche $branche)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Branche $branche)
-    {
-        //
+        return response()->json([
+            'success' => true,
+            'data' => $branche
+        ]);
     }
 
     /**
@@ -53,7 +52,13 @@ class BrancheController extends Controller
      */
     public function update(UpdateBrancheRequest $request, Branche $branche)
     {
-        //
+        $branche->update($request->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Branche updated successfully',
+            'data' => $branche
+        ]);
     }
 
     /**
@@ -61,6 +66,11 @@ class BrancheController extends Controller
      */
     public function destroy(Branche $branche)
     {
-        //
+        $branche->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Branche deleted successfully'
+        ]);
     }
 }

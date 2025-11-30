@@ -11,18 +11,35 @@ class StoretransactionRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            //
+            'debit_account_id' => 'nullable|uuid|exists:accounts,id',
+            'credit_account_id' => 'nullable|uuid|exists:accounts,id',
+            'debit_card_id' => 'nullable|uuid|exists:cards,id',
+            'credit_card_id' => 'nullable|uuid|exists:cards,id',
+            'debit_customer_id' => 'nullable|uuid|exists:customers,id',
+            'credit_customer_id' => 'nullable|uuid|exists:customers,id',
+            'amount' => 'required|numeric|min:0.01',
+            'currency_code' => 'required|string|size:3',
+            'exchange_rate' => 'nullable|numeric|min:0',
+            'transaction_type' => 'required|in:transfer,p2p,payment,deposit,withdrawal,fee,reversal,loan_disbursement,loan_payment,refund,salary,cashback',
+            'reference_number' => 'required|string|unique:transactions,reference_number',
+            'idempotency_key' => 'required|string|unique:transactions,idempotency_key',
+            'description' => 'nullable|string',
+            'counterparty_name' => 'nullable|string',
+            'counterparty_account' => 'nullable|string',
+            'counterparty_bank' => 'nullable|string',
+            'status' => 'nullable|in:pending,success,failed,reversed,cancelled',
+            'executed_at' => 'nullable|date',
+            'performed_by' => 'nullable|uuid|exists:users,id',
+            'branch_id' => 'nullable|uuid|exists:branches,id',
+            'loan_id' => 'nullable|uuid|exists:loans,id',
+            'channel' => 'nullable|string|max:20',
         ];
     }
+
 }

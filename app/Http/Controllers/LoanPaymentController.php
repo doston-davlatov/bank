@@ -13,15 +13,15 @@ class LoanPaymentController extends Controller
      */
     public function index()
     {
-        //
-    }
+        // Loan payment lar, pagination bilan, loan relation bilan
+        $payments = Loan_payment::with(['loan', 'transaction'])
+            ->orderBy('payment_date', 'desc')
+            ->paginate(20);
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return response()->json([
+            'success' => true,
+            'data' => $payments
+        ]);
     }
 
     /**
@@ -29,7 +29,13 @@ class LoanPaymentController extends Controller
      */
     public function store(StoreLoan_paymentRequest $request)
     {
-        //
+        $payment = Loan_payment::create($request->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Loan payment created successfully',
+            'data' => $payment
+        ], 201);
     }
 
     /**
@@ -37,15 +43,12 @@ class LoanPaymentController extends Controller
      */
     public function show(Loan_payment $loan_payment)
     {
-        //
-    }
+        $loan_payment->load(['loan', 'transaction']);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Loan_payment $loan_payment)
-    {
-        //
+        return response()->json([
+            'success' => true,
+            'data' => $loan_payment
+        ]);
     }
 
     /**
@@ -53,7 +56,13 @@ class LoanPaymentController extends Controller
      */
     public function update(UpdateLoan_paymentRequest $request, Loan_payment $loan_payment)
     {
-        //
+        $loan_payment->update($request->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Loan payment updated successfully',
+            'data' => $loan_payment
+        ]);
     }
 
     /**
@@ -61,6 +70,11 @@ class LoanPaymentController extends Controller
      */
     public function destroy(Loan_payment $loan_payment)
     {
-        //
+        $loan_payment->delete(); // agar soft delete ishlatilsa
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Loan payment deleted successfully'
+        ]);
     }
 }
