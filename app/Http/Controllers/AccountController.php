@@ -5,62 +5,47 @@ namespace App\Http\Controllers;
 use App\Models\Account;
 use App\Http\Requests\StoreAccountRequest;
 use App\Http\Requests\UpdateAccountRequest;
+use Illuminate\Http\Request;
 
 class AccountController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function __construct()
     {
-        //
+        $this->middleware('auth:sanctum'); // Xavfsizlik uchun
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function index(Request $request)
     {
-        //
+        $query = Account::with('holds', 'logs'); // Relationships qo'shish
+        if ($search = $request->query('search')) {
+            $query->where('name', 'like', "%{$search}%")->orWhere('balance', 'like', "%{$search}%");
+        }
+        return response()->json($query->paginate(10));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreAccountRequest $request)
     {
-        //
+        $account = Account::create($request->validated() + ['user_id' => auth()->id()]); // Foydalanuvchi bog'lash
+        return response()->json($account, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Account $account)
     {
-        //
+        $this->authorize('view', $account); // Policy bilan xavfsizlik
+        return response()->json($account->load('holds', 'logs'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Account $account)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UpdateAccountRequest $request, Account $account)
     {
-        //
+        $this->authorize('update', $account);
+        $account->update($request->validated());
+        return response()->json($account);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Account $account)
     {
-        //
+        $this->authorize('delete', $account);
+        $account->delete();
+        return response()->json(null, 204);
     }
 }

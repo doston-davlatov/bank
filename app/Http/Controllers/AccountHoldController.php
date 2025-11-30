@@ -2,65 +2,50 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Account_hold;
-use App\Http\Requests\StoreAccount_holdRequest;
-use App\Http\Requests\UpdateAccount_holdRequest;
+use App\Models\AccountHold;
+use App\Http\Requests\StoreAccountHoldRequest;
+use App\Http\Requests\UpdateAccountHoldRequest;
+use Illuminate\Http\Request;
 
 class AccountHoldController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function __construct()
     {
-        //
+        $this->middleware('auth:sanctum');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function index(Request $request)
     {
-        //
+        $query = AccountHold::with('account');
+        if ($accountId = $request->query('account_id')) {
+            $query->where('account_id', $accountId);
+        }
+        return response()->json($query->paginate(10));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreAccount_holdRequest $request)
+    public function store(StoreAccountHoldRequest $request)
     {
-        //
+        $hold = AccountHold::create($request->validated());
+        return response()->json($hold, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Account_hold $account_hold)
+    public function show(AccountHold $accountHold)
     {
-        //
+        $this->authorize('view', $accountHold);
+        return response()->json($accountHold->load('account'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Account_hold $account_hold)
+    public function update(UpdateAccountHoldRequest $request, AccountHold $accountHold)
     {
-        //
+        $this->authorize('update', $accountHold);
+        $accountHold->update($request->validated());
+        return response()->json($accountHold);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateAccount_holdRequest $request, Account_hold $account_hold)
+    public function destroy(AccountHold $accountHold)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Account_hold $account_hold)
-    {
-        //
+        $this->authorize('delete', $accountHold);
+        $accountHold->delete();
+        return response()->json(null, 204);
     }
 }

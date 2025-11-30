@@ -17,8 +17,10 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
+    public function boot()
     {
-        //
+        Gate::define('view', function ($user, $account) {
+            return $user->id === $account->user_id;
+        });
     }
 }
