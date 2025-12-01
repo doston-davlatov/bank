@@ -5,17 +5,27 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-    public function up()
+    public function up(): void
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
-            $table->uuid('debit_account_id')->nullable();
-            $table->uuid('credit_account_id')->nullable();
-            $table->uuid('debit_card_id')->nullable();
-            $table->uuid('credit_card_id')->nullable();
-            $table->uuid('debit_customer_id')->nullable();
-            $table->uuid('credit_customer_id')->nullable();
+            $table->foreignUuid('debit_account_id')->nullable()->constrained('accounts')->onDelete('restrict');
+            $table->foreignUuid('credit_account_id')->nullable()->constrained('accounts')->onDelete('restrict');
+            $table->foreignUuid('debit_card_id')->nullable()->constrained('cards')->onDelete('set null');
+            $table->foreignUuid('credit_card_id')->nullable()->constrained('cards')->onDelete('set null');
+            $table->foreignUuid('debit_customer_id')->nullable()->constrained('customers')->onDelete('restrict');
+            $table->foreignUuid('credit_customer_id')->nullable()->constrained('customers')->onDelete('restrict');
+            $table->foreignUuid('branch_id')->nullable()->constrained('branches')->onDelete('set null');
+
+            // performed_by → users.id → bigIncrements
+            $table->foreignId('performed_by')
+                ->nullable()
+                ->constrained('users')
+                ->onDelete('set null');
+
+            // loan_id ni hozircha olib tashlaymiz — keyinroq qo‘shamiz
+            // $table->foreignUuid('loan_id')->nullable()->constrained('loans')->onDelete('set null');
 
             $table->decimal('amount', 20, 4);
             $table->string('currency_code', 3)->default('UZS');
@@ -39,23 +49,9 @@ return new class extends Migration {
                 ->default('pending');
 
             $table->timestamp('executed_at')->nullable();
-            $table->uuid('performed_by')->nullable();
-            $table->uuid('branch_id')->nullable();
-            $table->uuid('loan_id')->nullable();
             $table->string('channel', 20)->default('web');
 
             $table->timestamps();
-
-            // Foreign keys
-            $table->foreign('debit_account_id')->references('id')->on('accounts')->onDelete('restrict');
-            $table->foreign('credit_account_id')->references('id')->on('accounts')->onDelete('restrict');
-            $table->foreign('debit_card_id')->references('id')->on('cards')->onDelete('set null');
-            $table->foreign('credit_card_id')->references('id')->on('cards')->onDelete('set null');
-            $table->foreign('debit_customer_id')->references('id')->on('customers')->onDelete('restrict');
-            $table->foreign('credit_customer_id')->references('id')->on('customers')->onDelete('restrict');
-            $table->foreign('performed_by')->references('id')->on('users')->onDelete('set null');
-            $table->foreign('branch_id')->references('id')->on('branches')->onDelete('set null');
-            $table->foreign('loan_id')->references('id')->on('loans')->onDelete('set null');
 
             // Indekslar
             $table->index(['executed_at', 'status']);
@@ -63,17 +59,15 @@ return new class extends Migration {
             $table->index('idempotency_key');
             $table->index('debit_customer_id');
             $table->index('credit_customer_id');
+            $table->index('performed_by');
         });
 
-        // CHECK constraint faqat SQLite bo‘lmagan hollarda qo‘shiladi
         if (config('database.default') !== 'sqlite') {
-            Schema::table('transactions', function (Blueprint $table) {
-                $table->check('amount > 0');
-            });
+            \DB::statement('ALTER TABLE transactions ADD CONSTRAINT chk_amount_positive CHECK (amount > 0)');
         }
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('transactions');
     }

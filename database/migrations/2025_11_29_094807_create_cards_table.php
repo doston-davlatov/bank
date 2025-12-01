@@ -1,44 +1,60 @@
 <?php
-// 4. 2025_01_01_000004_create_cards_table.php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-return new class extends Migration {
-    public function up()
+
+return new class extends Migration
+{
+    public function up(): void
     {
         Schema::create('cards', function (Blueprint $table) {
-            $table->uuid('id')->generatedAs()->primary();
-            $table->uuid('account_id');
-            $table->uuid('customer_id');           // Qo‘shimcha karta bo‘lsa ham mijozga to‘g‘ridan bog‘lanadi
-            $table->uuid('issued_by')->nullable(); // xodim
+            $table->uuid('id')->primary(); // yoki $table->uuid('id')->generatedAs()->primary();
 
+            // Account va Customer → UUID bo‘lgani uchun foreignUuid
+            $table->foreignUuid('account_id')
+                ->constrained('accounts')
+                ->onDelete('cascade');
+
+            $table->foreignUuid('customer_id')
+                ->constrained('customers')
+                ->onDelete('cascade');
+
+            // issued_by → users.id → bigIncrements(), shuning uchun foreignId
+            $table->foreignId('issued_by')
+                ->nullable()
+                ->constrained('users')
+                ->onDelete('set null');
+
+            // Karta ma'lumotlari
             $table->enum('card_type', ['UZCARD', 'HUMO', 'VISA', 'MASTERCARD']);
             $table->enum('card_product', ['Classic', 'Gold', 'Platinum', 'Virtual', 'Business']);
+
             $table->char('first_6', 6);
             $table->char('last_4', 4);
-            $table->string('masked_number');       // 8600 **** **** 1234
+            $table->string('masked_number', 30); // 8600 **** **** 1234
             $table->string('card_holder_name');
             $table->date('expiry_date');
-            $table->string('token')->unique()->nullable(); // PSP token (Payme, CloudPayments)
-            $table->boolean('is_primary')->default(false); // asosiy yoki qo‘shimcha karta
+
+            $table->string('token')->unique()->nullable(); // PSP token
+            $table->boolean('is_primary')->default(false);
             $table->boolean('is_active')->default(true);
+
             $table->timestamp('issued_at')->useCurrent();
             $table->timestamp('blocked_at')->nullable();
-
-            $table->foreign('account_id')->references('id')->on('accounts')->onDelete('cascade');
-            $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
-            $table->foreign('issued_by')->references('id')->on('users')->onDelete('set null');
 
             $table->softDeletes();
             $table->timestamps();
 
+            // Indekslar
             $table->index('customer_id');
             $table->index('masked_number');
             $table->index(['account_id', 'is_active']);
+            $table->index('is_primary');
         });
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('cards');
     }
