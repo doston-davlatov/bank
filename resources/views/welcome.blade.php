@@ -1,4 +1,4 @@
-<?php
+<!DOCTYPE html>
 @extends('layouts.app')
 
 @section('title', 'Bosh sahifa')

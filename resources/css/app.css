@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+    font-family: 'Nunito', sans-serif;
+    background: #f8fafc;
+}
 /* Custom styles */
 :root {
     --primary-color: #4f46e5;
